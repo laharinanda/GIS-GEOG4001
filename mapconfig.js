@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script type="text/javascript">
+
 var config = {
     style: 'mapbox://styles/mapbox/OrissaWaterMap',
     accessToken: 'pk.eyJ1IjoibGFoYXJpbmFuZGEiLCJhIjoiY2toYTcwdWdlMTluNDJ0bDI4dW00ODkxMCJ9.3-WXcscfuwcqIrkaUFD9dA',
@@ -124,3 +130,7 @@ var config = {
 
     ]
 };
+
+</script> 
+</head>
+</html> 
