@@ -1,141 +1,304 @@
 <!DOCTYPE html>
+
+<!--
+BSD 3-Clause License
+
+Copyright (c) 2019, Mapbox
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
 <html>
+  <head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <style>
+        body {
+            margin:0;
+            padding:0;
+            font-family: sans-serif;
+        }
+        a, a:hover, a:visited {
+            color: #0071bc;
+        }
+        #map {
+            top:0;
+            height: 100vh;
+            width:100vw;
+            position: fixed;
+            z-index: -5;
+        }
+        #header {
+            margin: 3vh auto;
+            width: 90vw;
+            padding: 2vh;
+            text-align: center;
+        }
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+        }
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+            z-index: 100;
+        }
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+        .dark {
+            color: #fafafa;
+            background-color: #444;
+        }
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+            opacity: 0.25;
+        }
+        .step.active {
+            opacity: 0.9;
+        }
 
-<head>
-  <style>
+        .step div {
+            padding:  25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+        }
 
-.introduction {
+        .step img {
+            width: 100%;
+        }
 
-  background-color: pink;
-  border: 1px solid purple;
-  width: 100%;
-  height: 100px;
-
-
-}
-
-.introtext {
-  font-size: 33px;
-  font-weight: bold;
-  vertical-align: middle;
-  position: relative;
-  text-align: center;
-
-}
-.description {
-
-  border: 1px solid green;
-  width: 100%;
-  height: 210px;
-  background-color: blanchedalmond;
-  text-align: center;
-
-}
-
-.table {
-
-  width: 100%;
-  height: 100%;
-  border: 2px solid black
-
-
-}
-
-.checklist {
-
-  border: 1px solid purple;
-  width: 100%
-  height: 100px;
-  background-color: blanchedalmond;
-
-}
-
-.links {
-  width: 100%;
-  height: 40px;
-  background-color: blanchedalmond;
-  padding-left: 10px;
-  padding-right: 10px;
-
-
-}
-
-  </style>
-
-
-
+        @media (max-width: 750px) {
+            #features {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+        </style>
 </head>
+
 <body>
-  <table style="width:100%">
 
+  <div id="map"></div>
+  <div id="story"></div>
+  <script src="./story.js"></script>
 
-<tr width:100%>
-    <td> <div class="introduction"> <div class="introtext"> Let's tell the stories you want to tell. </div> </div> </td>
+  <script>
+    var layerTypes = {
+        'fill': ['fill-opacity'],
+        'line': ['line-opacity'],
+        'circle': ['circle-opacity', 'circle-stroke-opacity'],
+        'symbol': ['icon-opacity', 'text-opacity'],
+        'raster': ['raster-opacity'],
+        'fill-extrusion': ['fill-extrusion-opacity']
+    }
 
-</tr>
+    var alignments = {
+        'left': 'lefty',
+        'center': 'centered',
+        'right': 'righty'
+    }
 
-</table>
+    function getLayerPaintType(layer) {
+        var layerType = map.getLayer(layer).type;
+        return layerTypes[layerType];
+    }
 
-<table style="width:100%">
-<tr>
+    function setLayerOpacity(layer) {
+        var paintProps = getLayerPaintType(layer.layer);
+        paintProps.forEach(function(prop) {
+            map.setPaintProperty(layer.layer, prop, layer.opacity);
+        });
+    }
 
-<th> <a href="aboutme.html" target="_blank"> About Me </a> </th>
-<th> <a href="learning.html" target="_blank"> Learning </a> </th>
-<th> <a href="" target="_blank"> Mindset and Thought Process </a> </th>
-<th> <a href="" target="_blank"> Work </a> </th>
+    var story = document.getElementById('story');
+    var features = document.createElement('div');
+    features.classList.add(alignments[config.alignment]);
+    features.setAttribute('id', 'features');
 
-</tr>
+    var header = document.createElement('div');
 
-</table>
+    if (config.title) {
+        var titleText = document.createElement('h1');
+        titleText.innerText = config.title;
+        header.appendChild(titleText);
+    }
 
+    if (config.subtitle) {
+        var subtitleText = document.createElement('h2');
+        subtitleText.innerText = config.subtitle;
+        header.appendChild(subtitleText);
+    }
 
-<table>
+    if (config.byline) {
+        var bylineText = document.createElement('p');
+        bylineText.innerText = config.byline;
+        header.appendChild(bylineText);
+    }
 
-<tr> <div class="description" align="left">
+    if (header.innerText.length > 0) {
+        header.classList.add(config.theme);
+        header.setAttribute('id', 'header');
+        story.appendChild(header);
+    }
 
-  <p> The stories we tell as humans are about everything we see around ourselves.
+    config.chapters.forEach((record, idx) => {
+        var container = document.createElement('div');
+        var chapter = document.createElement('div');
 
-    <br>
-    <br>
-    These could be architectural marvels, the animal kingdom, flora or even the tale of a tool. But who tells our stories?<br> <br>
-  This website showcases the stories of humans that I have told and continue to tell. No, it does not derive from Humans of New York. Rather, it focuses
-  on stories that impact communities. My most complex musings of the world around me are here. Come, lone ranger. Find your seat amongst the legends and tales
-  that surround you.
+        if (record.title) {
+            var title = document.createElement('h3');
+            title.innerText = record.title;
+            chapter.appendChild(title);
+        }
 
-  </p>
-</tr>
+        if (record.image) {
+            var image = new Image();
+            image.src = record.image;
+            chapter.appendChild(image);
+        }
 
-<tr>
-<h1 align="center"> A Primer on my Storytelling </h1>
+        if (record.description) {
+            var story = document.createElement('p');
+            story.innerHTML = record.description;
+            chapter.appendChild(story);
+        }
 
-<p>
-As someone being educated to become a journalist, the way I tell my stories is shaped by the Canadian mediascape.
-This means that my language is simple, my sentences are concise and I use punctuation that amplifies the meaning
-of my story. These tales that transcend time (notice the alliteration there?) are about normal people and narratives that are woven into
-their lives. <br>
-<br>
-<p align="center"> Click the links in the overhead panel to read some of my work and find something that resonates with you. </p>
+        container.setAttribute('id', record.id);
+        container.classList.add('step');
+        if (idx === 0) {
+            container.classList.add('active');
+        }
 
+        chapter.classList.add(config.theme);
+        container.appendChild(chapter);
+        features.appendChild(container);
+    });
 
+    story.appendChild(features);
 
+    var footer = document.createElement('div');
 
+    if (config.footer) {
+        var footerText = document.createElement('p');
+        footerText.innerHTML = config.footer;
+        footer.appendChild(footerText);
+    }
 
+    if (footer.innerText.length > 0) {
+        footer.classList.add(config.theme);
+        footer.setAttribute('id', 'footer');
+        story.appendChild(footer);
+    }
 
- </p>
-</tr>
+    mapboxgl.accessToken = config.accessToken;
 
+    const transformRequest = (url) => {
+        const hasQuery = url.indexOf("?") !== -1;
+        const suffix = hasQuery ? "&pluginName=journalismScrollytelling" : "?pluginName=journalismScrollytelling";
+        return {
+          url: url + suffix
+        }
+    }
 
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: config.style,
+        center: config.chapters[0].location.center,
+        zoom: config.chapters[0].location.zoom,
+        bearing: config.chapters[0].location.bearing,
+        pitch: config.chapters[0].location.pitch,
+        scrollZoom: false,
+        transformRequest: transformRequest
+    });
 
+    var marker = new mapboxgl.Marker();
+    if (config.showMarkers) {
+        marker.setLngLat(config.chapters[0].location.center).addTo(map);
+    }
 
-</div>
+    // instantiate the scrollama
+    var scroller = scrollama();
 
-</tr>
+    map.on("load", function() {
+        // setup the instance, pass callback functions
+        scroller
+        .setup({
+            step: '.step',
+            offset: 0.5,
+            progress: true
+        })
+        .onStepEnter(response => {
+            var chapter = config.chapters.find(chap => chap.id === response.element.id);
+            response.element.classList.add('active');
+            map.flyTo(chapter.location);
+            if (config.showMarkers) {
+                marker.setLngLat(chapter.location.center);
+            }
+            if (chapter.onChapterEnter.length > 0) {
+                chapter.onChapterEnter.forEach(setLayerOpacity);
+            }
+        })
+        .onStepExit(response => {
+            var chapter = config.chapters.find(chap => chap.id === response.element.id);
+            response.element.classList.remove('active');
+            if (chapter.onChapterExit.length > 0) {
+                chapter.onChapterExit.forEach(setLayerOpacity);
+            }
+        });
+    });
 
+    // setup resize event
+    window.addEventListener('resize', scroller.resize);
 
-
-
-
-
-
-  </table>
+  </script>
+  </body>
 </html>
