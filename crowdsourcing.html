@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sheetrock/1.1.4/dist/sheetrock.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" crossorigin=""></script>
+
+<style>
+
+body {
+  scroll-padding-top: 40px; /* height of sticky header */
+  var(--top-spacing);
+  margin: var(--top-spacing) auto;
+  max-width: 95%;
+}
+
+/* Ultimately, this is the correct place for scroll-padding */
+html {
+  scroll-padding-top: 40px; /* height of sticky header */
+  --top-spacing: 100px;
+
+}
+
+header.fixed{
+    height: 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 30;
+    width: 100%;
+    text-align: center;
+    background-color: blanchedalmond;
+    padding-top: 10px;
+
+
+      }
+
+
+  .clearfix {
+    overflow:auto;
+    position: relative;
+    text-align: center;
+    color: white;
+    font-size: 50px;
+    border-collapse: collapse;
+    border-spacing: 0;
+
+  }
+
+  .blank{
+    width: 100%;
+    height:50px;
+
+  }
+
+/* centered text */
+  .centered {
+    position: absolute;
+    top: 55%;
+    left: 7%;
+    transform: (-50%, -50%);
+    color: white;
+  }
+
+
+  .display {
+    display: flex;
+  }
+
+  .display map {
+    flex: 1;
+  }
+
+  .display form {
+    flex: 1;
+  }
+
+  .clearfix2 {
+    clear:both;
+  }
+
+
+  mark {
+    color: white;
+    background-color: black;
+  }
+
+  .explain {
+    text-align: center;
+    background-color: blanchedalmond;
+    font-size: 20px;
+  }
+
+  h3 {
+    background-color: blanchedalmond;
+    font-size: 20px;
+  }
+
+/*
+  .table {
+    border-spacing:0;
+    border-collapse: separate;
+    width: 100%;
+  }*/
+
+  #map {
+    border-style: solid hidden;
+    border-color: black blue;
+    border: 2px solid;
+  }
+
+
+
+
+</style>
+
+  </head>
+  <body>
+    <header class='fixed'>
+    <table style="width:100%">
+
+    <tr class="links">
+
+    <th> <a href="aboutme.html" target="_blank"> About Me </a> </th>
+    <th> <a href="learning.html" target="_blank"> Learning </a> </th>
+    <th> <a href="" target="_blank"> Work </a> </th>
+
+    </tr>
+
+    </table>
+    </header>
+
+    <table class="table">
+<tr>
+
+      <div class="clearfix">
+        <img src="https://github.com/laharinanda/laharinanda.github.io/blob/main/assignment2.PNG" width="100%">
+        <div class ="centered"> <mark> Biryani Blues in Bhubaneswar </mark> </div>
+      </div>
+</tr>
+
+<tr>
+  <div class="explain">
+    Have you ever been to Bhubaneswar, Odisha? Have you ever tasted Biryani? Have you ever had biryani <i> in</i> Bhubaneswar? If not, this map is your chance to find
+    the best outlets in Bhubaneswar that cater to your cravings for biryani. If you are from Odisha or have had the pleasure of eating biryani in Bhubaneswar,
+    do log your favourite biryani hotspots on the map for others to see!
+
+  <h3 align="center"> The Origins of Biryani </h3>
+    Biryani is a dish made with slow-cooked meat and spiced rice. The traditional flavours of biryani were brought to India by the various foreign rulers who introduced their
+    cultures to the Indian subcontinent. Riding horseback across the Northern deserts, Afghan and Persian rulers brought the delectable flavours of chicken and mutton Biryani
+    with them. Once inside the continent, the spice mixtures, textures of rice, cooking styles of the meat, and the dishes in which Biryani were served and cooked evolved
+    based on which state the biryani was made in. <br>
+
+  </div>
+
+</tr>
+
+<tr>
+<div class="blank">
+</div>
+</tr>
+
+    </table>
+
+
+
+    <table class="holdtable">
+
+    </table>
+
+<tr>
+<div class="display">
+  <td>
+
+    <div id='map' style='width: 50%; height: 500px;'></div>
+  </td>
+
+  <td  rowspan="2">
+  <div class="form">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexCjkpTMWCpakyh-FZ5rXc3gzYZBlR681dStwQoNaZYd_b0Q/viewform?embedded=true" width="800" height="1000" frameborder="0">Loading…</iframe>
+  </div>
+  </td>
+</div>
+</tr>
+
+
+<div class ="clearfix2"> </div>
+
+    <script type="text/javascript">
+      /*Initialize Map*/
+      mapboxgl.accessToken = 'pk.eyJ1IjoibGFoYXJpbmFuZGEiLCJhIjoiY2tnZ2FseWUzMXNodjJzczV4cmFkaDBkOCJ9.KEYsDCDni0jL4veezXYxEQ';
+      var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+        center: [85.80781, 20.27395], // starting position [lng, lat]
+        zoom: 10.81
+
+      });
+
+      /*SheetRock*/
+      // Define spreadsheet URL.
+      var mySpreadsheet = 'https://docs.google.com/spreadsheets/d/12Uw2qU6iM8tNjVsKIA7Kd4MjjFDf8ZJqBQpF7tX00ww/edit#gid=0';
+      // Load an entire worksheet.
+      /*$(".holdtable").sheetrock({
+        url: mySpreadsheet
+      });*/
+
+
+
+      sheetrock({
+        url: mySpreadsheet,
+        callback: draw
+      });
+
+      function draw(error, options, response) {
+
+        data=response.rows;
+        console.log(response);
+        for(i in data){
+          if(i>6){  //This line is there as
+            console.log(data[i].cellsArray[2])
+            console.log(data[i].cellsArray[5])
+            console.log(data[i].cellsArray[6])
+            var marker = new mapboxgl.Marker()
+              .setLngLat([data[i].cellsArray[6], data[i].cellsArray[5]])
+              .setPopup(new mapboxgl.Popup().setHTML("<h2>Store:</h2>"+ data[i].cellsArray[1] + "<p><h2>Type of Biryani:</h2>" + data[i].cellsArray[3]))
+              .addTo(map);
+          }
+        }
+      }
+
+    </script>
+
+
+  </body>
+</html>
